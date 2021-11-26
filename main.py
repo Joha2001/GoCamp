@@ -29,7 +29,6 @@ FAILURE_EMOJI = "❌"
 headers = {"User-Agent": UserAgent().random}
 app = Flask(__name__)
 
-
 def format_date(date_object, format_string=ISO_DATE_FORMAT_REQUEST):
     """
     This function doesn't manipulate the date itself at all, it just
@@ -117,7 +116,16 @@ def get_park_information(park_id, start_date, end_date, campsite_type=None):
 def get_name_of_park(park_id):
     url = "{}{}{}".format(BASE_URL, MAIN_PAGE_ENDPOINT, park_id)
     resp = send_request(url, {})
-    return resp["campground"]["facility_name"]   
+    return resp["campground"]["facility_name"] 
+    
+def get_campground_activities(park_id):
+    url = "{}{}{}".format(BASE_URL, MAIN_PAGE_ENDPOINT, park_id)
+    resp = send_request(url, {})
+    activities = resp["campground"]["activities"]
+    activity_names = []
+    for i in range(len(activities)):
+        activity_names.append(activities[i]["activity_name"])
+    return activity_names      
 
 
 def get_num_available_sites(park_information, start_date, end_date, nights=None):
@@ -236,7 +244,12 @@ def webhook():
         if availabilities:
           fulfillmentText = "There are {} out of {} campsites available from {} to {}!".format(current, maximum, start_date,end_date)
         else:
-          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date)
+          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date)     
+    if query_result.get('action') == 'FindAvailability.FindAvailability-custom':
+          activities = get_campground_activities(park_id)
+          fulfillmentText = ("\nActivities at this campground:")
+          for i in range(len(activities)):
+                fulfillmentText.append(activities[i])
 
     return {
         "fulfillmentText": fulfillmentText,
