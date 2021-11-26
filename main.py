@@ -229,6 +229,8 @@ def webhook():
     req = request.get_json(silent=True, force=True)
     fulfillmentText = ''
     query_result = req.get('queryResult')
+
+    # get availability of campground
     if query_result.get('action') == 'DefaultWelcomeIntent.DefaultWelcomeIntent-custom':
         park_id = int(query_result.get('parameters').get('park'))
         start_date = query_result.get('parameters').get('start-date')
@@ -244,12 +246,31 @@ def webhook():
         if availabilities:
           fulfillmentText = "There are {} out of {} campsites available from {} to {}!".format(current, maximum, start_date,end_date)
         else:
-          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date)     
+          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
+
+    # get activities at campground        
     if query_result.get('action') == 'FindAvailability.FindAvailability-custom':
-          activities = get_campground_activities(park_id)
-          fulfillmentText = ("\nActivities at this campground:")
-          for i in range(len(activities)):
-                fulfillmentText.append(activities[i])
+
+      
+         contexts = query_result['outputContexts']
+         for i in range(len(contexts)):
+          if contexts[i].get('parameters') != None:
+           park_id = int(contexts[i]['parameters']['park'])
+           break
+         
+         activities = get_campground_activities(park_id)
+         fulfillmentText = ("The activities at this campground are ")
+         for i in range(len(activities)):
+               fulfillmentText += activities[i].lower()
+               if i == len(activities) - 1:
+                fulfillmentText += (".")
+               else: 
+                 fulfillmentText += (", ")
+               if i == len(activities) - 2:
+                fulfillmentText += (" and ")
+               
+         
+
 
     return {
         "fulfillmentText": fulfillmentText,
