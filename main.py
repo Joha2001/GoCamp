@@ -232,6 +232,7 @@ def webhook():
 
     # get availability of campground
     if query_result.get('action') == 'DefaultWelcomeIntent.DefaultWelcomeIntent-custom':
+
         park_id = int(query_result.get('parameters').get('park'))
         start_date = query_result.get('parameters').get('start-date')
         start_date = start_date.split('T')[0]
@@ -251,13 +252,14 @@ def webhook():
     # get activities at campground        
     if query_result.get('action') == 'FindAvailability.FindAvailability-custom':
 
-      
+         # get park ID
          contexts = query_result['outputContexts']
          for i in range(len(contexts)):
           if contexts[i].get('parameters') != None:
            park_id = int(contexts[i]['parameters']['park'])
            break
-         
+
+         # generate output
          activities = get_campground_activities(park_id)
          fulfillmentText = ("The activities at this campground are ")
          for i in range(len(activities)):
