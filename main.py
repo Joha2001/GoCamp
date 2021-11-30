@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 from dateutil import rrule
 from itertools import count, groupby
-
+# Merge
 import requests
 from fake_useragent import UserAgent
 
@@ -28,7 +28,6 @@ FAILURE_EMOJI = "❌"
 
 headers = {"User-Agent": UserAgent().random}
 app = Flask(__name__)
-
 
 def format_date(date_object, format_string=ISO_DATE_FORMAT_REQUEST):
     """
@@ -117,7 +116,16 @@ def get_park_information(park_id, start_date, end_date, campsite_type=None):
 def get_name_of_park(park_id):
     url = "{}{}{}".format(BASE_URL, MAIN_PAGE_ENDPOINT, park_id)
     resp = send_request(url, {})
-    return resp["campground"]["facility_name"]   
+    return resp["campground"]["facility_name"] 
+    
+def get_campground_activities(park_id):
+    url = "{}{}{}".format(BASE_URL, MAIN_PAGE_ENDPOINT, park_id)
+    resp = send_request(url, {})
+    activities = resp["campground"]["activities"]
+    activity_names = []
+    for i in range(len(activities)):
+        activity_names.append(activities[i]["activity_name"])
+    return activity_names      
 
 
 def get_num_available_sites(park_information, start_date, end_date, nights=None):
@@ -221,7 +229,10 @@ def webhook():
     req = request.get_json(silent=True, force=True)
     fulfillmentText = ''
     query_result = req.get('queryResult')
+
+    # get availability of campground
     if query_result.get('action') == 'DefaultWelcomeIntent.DefaultWelcomeIntent-custom':
+
         park_id = int(query_result.get('parameters').get('park'))
         start_date = query_result.get('parameters').get('start-date')
         start_date = start_date.split('T')[0]
@@ -236,7 +247,32 @@ def webhook():
         if availabilities:
           fulfillmentText = "There are {} out of {} campsites available from {} to {}!".format(current, maximum, start_date,end_date)
         else:
-          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date)
+          fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
+
+    # get activities at campground        
+    if query_result.get('action') == 'FindAvailability.FindAvailability-custom':
+
+         # get park ID
+         contexts = query_result['outputContexts']
+         for i in range(len(contexts)):
+          if contexts[i].get('parameters') != None:
+           park_id = int(contexts[i]['parameters']['park'])
+           break
+
+         # generate output
+         activities = get_campground_activities(park_id)
+         fulfillmentText = ("The activities at this campground are ")
+         for i in range(len(activities)):
+               fulfillmentText += activities[i].lower()
+               if i == len(activities) - 1:
+                fulfillmentText += (".")
+               else: 
+                 fulfillmentText += (", ")
+               if i == len(activities) - 2:
+                fulfillmentText += (" and ")
+               
+         
+
 
     return {
         "fulfillmentText": fulfillmentText,
