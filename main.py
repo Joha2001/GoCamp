@@ -127,6 +127,16 @@ def get_campground_activities(park_id):
         activity_names.append(activities[i]["activity_name"])
     return activity_names      
 
+def get_facility_description(park_id):
+    url = "{}{}{}".format(BASE_URL, MAIN_PAGE_ENDPOINT, park_id)
+    resp = send_request(url, {})
+    descriptions_list = resp["campground"]["facility_description_map"]
+    facilities = descriptions_list["Facilities"]
+    natural_features = descriptions_list["Natural Features"]
+    nearby_attractions = descriptions_list["Nearby Attractions"]
+    overview = descriptions_list["Overview"]
+    recreation = descriptions_list["Recreation"]
+    return facilities, natural_features, nearby_attractions, overview, recreation
 
 def get_num_available_sites(park_information, start_date, end_date, nights=None):
     availabilities_filtered = []
@@ -231,9 +241,9 @@ def webhook():
     query_result = req.get('queryResult')
 
     # get availability of campground
-    if query_result.get('action') == 'DefaultWelcomeIntent.DefaultWelcomeIntent-custom':
-
-        park_id = int(query_result.get('parameters').get('park'))
+    if query_result.get('action') == 'FAGivenCamp':
+        
+        park_id = int(query_result.get('parameters').get('Campground'))
         start_date = query_result.get('parameters').get('start-date')
         start_date = start_date.split('T')[0]
         end_date = query_result.get('parameters').get('end-date')
@@ -250,13 +260,13 @@ def webhook():
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
 
     # get activities at campground        
-    if query_result.get('action') == 'FindAvailability.FindAvailability-custom':
+    if query_result.get('action') == 'CampgroundActivities':
 
          # get park ID
          contexts = query_result['outputContexts']
          for i in range(len(contexts)):
           if contexts[i].get('parameters') != None:
-           park_id = int(contexts[i]['parameters']['park'])
+           park_id = int(contexts[i]['parameters']['Campground'])
            break
 
          # generate output
@@ -270,10 +280,24 @@ def webhook():
                  fulfillmentText += (", ")
                if i == len(activities) - 2:
                 fulfillmentText += (" and ")
-               
-         
 
 
+    # get campground description        
+    if query_result.get('action') == 'CampgroundDescription':
+
+         # get park ID
+        contexts = query_result['outputContexts']
+        for i in range(len(contexts)):
+         if contexts[i].get('parameters') != None:
+          park_id = int(contexts[i]['parameters']['Campground'])
+          break
+
+         # generate output
+        facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
+        fulfillmentText = overview
+    
+                      
+        
     return {
         "fulfillmentText": fulfillmentText,
         "source": "webhookdata"
