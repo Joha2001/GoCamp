@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, request
 import json
+import webbrowser
 import logging
 from datetime import datetime, timedelta
 from dateutil import rrule
@@ -138,6 +139,10 @@ def get_facility_description(park_id):
     recreation = descriptions_list["Recreation"]
     return facilities, natural_features, nearby_attractions, overview, recreation
 
+def get_reservation_url(park_id):
+    url = "{}/camping/campgrounds/{}".format(BASE_URL, park_id)
+    return url    
+
 def get_num_available_sites(park_information, start_date, end_date, nights=None):
     availabilities_filtered = []
     maximum = len(park_information)
@@ -248,6 +253,7 @@ def webhook():
         start_date = start_date.split('T')[0]
         end_date = query_result.get('parameters').get('end-date')
         end_date = end_date.split('T')[0]
+        res_url = get_reservation_url(park_id)
         availabilities = False;
         out = []
         current, maximum, _, name_of_park = check_park(park_id, datetime.strptime(start_date, '%Y-%m-%d'), datetime.strptime(end_date, '%Y-%m-%d'), campsite_type=None)
@@ -255,7 +261,8 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}!".format(current, maximum, start_date,end_date)
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to: ".format(current, maximum, start_date,end_date, res_url)
+          webbrowser.get('chrome').open_new_tab(res_url)
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
 
