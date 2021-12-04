@@ -284,18 +284,17 @@ def webhook():
 
     # get campground description        
     if query_result.get('action') == 'CampgroundDescription':
-
+        fulfillmentText = "test"
          # get park ID
-         contexts = query_result['outputContexts']
-         for i in range(len(contexts)):
-          if contexts[i].get('parameters') != None:
-           park_id = int(contexts[i]['parameters']['Campground'])
-           break
+       #  contexts = query_result['outputContexts']
+         #for i in range(len(contexts)):
+         # if contexts[i].get('parameters') != None:
+          # park_id = int(contexts[i]['parameters']['Campground'])
+          # break
 
          # generate output
-         descriptions = get_facility_description(park_id)
-         fulfillmentText = ("\nCampground description:")
-         fulfillmentText += ("Overview: \n" + descriptions[3])
+         #facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
+         #fulfillmentText = overview
     
                       
         
