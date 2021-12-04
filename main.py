@@ -253,7 +253,7 @@ def webhook():
         start_date = start_date.split('T')[0]
         end_date = query_result.get('parameters').get('end-date')
         end_date = end_date.split('T')[0]
-        res_url = get_reservation_url(park_id)
+        #res_url = get_reservation_url(park_id)
         availabilities = False;
         out = []
         current, maximum, _, name_of_park = check_park(park_id, datetime.strptime(start_date, '%Y-%m-%d'), datetime.strptime(end_date, '%Y-%m-%d'), campsite_type=None)
@@ -262,7 +262,7 @@ def webhook():
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
           fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to: ".format(current, maximum, start_date,end_date)
-          webbrowser.open_new_tab(res_url)
+          #webbrowser.open_new_tab(res_url)
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
 
