@@ -261,7 +261,7 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to: ".format(current, maximum, start_date,end_date, res_url)
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to: {}".format(current, maximum, start_date,end_date, res_url)
           webbrowser.open_new_tab(res_url)
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
