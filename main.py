@@ -266,7 +266,7 @@ def webhook():
          contexts = query_result['outputContexts']
          for i in range(len(contexts)):
           if contexts[i].get('parameters') != None:
-           park_id = int(contexts[i]['parameters']['park'])
+           park_id = int(contexts[i]['parameters']['Campground'])
            break
 
          # generate output
@@ -282,14 +282,14 @@ def webhook():
                 fulfillmentText += (" and ")
 
 
-      # get campground description        
+    # get campground description        
     if query_result.get('action') == 'CampgroundDescription':
 
          # get park ID
          contexts = query_result['outputContexts']
          for i in range(len(contexts)):
           if contexts[i].get('parameters') != None:
-           park_id = int(contexts[i]['parameters']['park'])
+           park_id = int(contexts[i]['parameters']['Campground'])
            break
 
          # generate output
