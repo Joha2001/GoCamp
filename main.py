@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, request
 import json
-import webbrowser
+#import webbrowser
 import logging
 from datetime import datetime, timedelta
 from dateutil import rrule
@@ -261,8 +261,8 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to: ".format(current, maximum, start_date,end_date, res_url)
-          webbrowser.get('chrome').open_new_tab(res_url)
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to:{}".format(current, maximum, start_date,end_date, res_url)
+         
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
 
