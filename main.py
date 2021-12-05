@@ -253,7 +253,6 @@ def webhook():
         start_date = start_date.split('T')[0]
         end_date = query_result.get('parameters').get('end-date')
         end_date = end_date.split('T')[0]
-        res_url = get_reservation_url(park_id)
         availabilities = False;
         out = []
         current, maximum, _, name_of_park = check_park(park_id, datetime.strptime(start_date, '%Y-%m-%d'), datetime.strptime(end_date, '%Y-%m-%d'), campsite_type=None)
@@ -261,7 +260,7 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Here is a link to reserve a campsite if you'd like to:{}".format(current, maximum, start_date,end_date, res_url)
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Would you like me to provide you with a link to reserve a campsite at {}?".format(current, maximum, start_date,end_date,name_of_park.lower())
          
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
@@ -302,6 +301,19 @@ def webhook():
          # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
         fulfillmentText = overview
+
+    # get campground reservation link
+    if query_result.get('action') == 'ReservationURL':
+
+        # get park ID
+        contexts = query_result['outputContexts']
+        for i in range(len(contexts)):
+         if contexts[i].get('parameters') != None:
+          park_id = int(contexts[i]['parameters']['Campground'])
+          break
+
+        res_url = get_reservation_url(park_id) 
+        fulfillmentText = "Ok, here's the link: \n" + res_url
     
                       
         
