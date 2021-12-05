@@ -138,6 +138,10 @@ def get_facility_description(park_id):
     recreation = descriptions_list["Recreation"]
     return facilities, natural_features, nearby_attractions, overview, recreation
 
+def get_reservation_url(park_id):
+    url = "{}/camping/campgrounds/{}".format(BASE_URL, park_id)
+    return url    
+
 def get_num_available_sites(park_information, start_date, end_date, nights=None):
     availabilities_filtered = []
     maximum = len(park_information)
@@ -255,7 +259,8 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}!".format(current, maximum, start_date,end_date)
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Would you like me to provide you with a link to reserve a campsite at {}?".format(current, maximum, start_date,end_date,name_of_park.lower())
+         
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
 
@@ -295,6 +300,19 @@ def webhook():
          # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
         fulfillmentText = overview
+
+    # get campground reservation link
+    if query_result.get('action') == 'ReservationURL':
+
+        # get park ID
+        contexts = query_result['outputContexts']
+        for i in range(len(contexts)):
+         if contexts[i].get('parameters') != None:
+          park_id = int(contexts[i]['parameters']['Campground'])
+          break
+
+        res_url = get_reservation_url(park_id) 
+        fulfillmentText = "Ok, here's the link: \n" + res_url
     
                       
         
