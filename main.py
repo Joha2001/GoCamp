@@ -312,7 +312,7 @@ def webhook():
           break
 
         res_url = get_reservation_url(park_id) 
-        fulfillmentText = "Ok, here's the link: \n" + res_url
+        fulfillmentText = "Ok, here's the link: \n" + res_url + ".\n By the way, let me know if you'd like to hear more information about the campsite, activities to do there, its natural features, or nearby attractions!"
     
                       
         
