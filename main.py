@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, request
 import json
-#import webbrowser
 import logging
 from datetime import datetime, timedelta
 from dateutil import rrule
