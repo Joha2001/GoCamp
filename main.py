@@ -259,7 +259,7 @@ def webhook():
           availabilities = True
         out.append("{} ({}): {} site(s) available out of {} site(s)".format(name_of_park, park_id, current, maximum))
         if availabilities:
-          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Would you like me to provide you with a link to reserve a campsite at {}?".format(current, maximum, start_date,end_date,name_of_park.lower())
+          fulfillmentText = "There are {} out of {} campsites available from {} to {}! Would you like me to provide you with a link to reserve a campsite at {}?".format(current, maximum, start_date,end_date,name_of_park.lower().title())
          
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
@@ -299,7 +299,42 @@ def webhook():
 
          # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
-        fulfillmentText = overview
+        #shorten length to 3 sentences or less
+        overview = ".".join(overview.split(".", 3)[:3])
+        fulfillmentText = overview.replace("<br/>", "")
+
+    # get campground natural features       
+    if query_result.get('action') == 'NaturalFeatures':
+
+         # get park ID
+        contexts = query_result['outputContexts']
+        for i in range(len(contexts)):
+         if contexts[i].get('parameters') != None:
+          park_id = int(contexts[i]['parameters']['Campground'])
+          break
+
+        # generate output
+        facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
+        #shorten length to 3 sentences or less
+        natural_features = ".".join(natural_features.split(".", 3)[:3])
+        fulfillmentText = natural_features.replace("<br/>", "")
+
+    # get nearby attractions       
+    if query_result.get('action') == 'NearbyAttractions':
+
+         # get park ID
+        contexts = query_result['outputContexts']
+        for i in range(len(contexts)):
+         if contexts[i].get('parameters') != None:
+          park_id = int(contexts[i]['parameters']['Campground'])
+          break
+
+        # generate output
+        facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
+        #shorten length to 3 sentences or less`
+        nearby_attractions = ".".join(nearby_attractions.split(".", 3)[:3])
+        fulfillmentText = nearby_attractions.replace("<br/>", "")    
+
 
     # get campground reservation link
     if query_result.get('action') == 'ReservationURL':
@@ -312,7 +347,7 @@ def webhook():
           break
 
         res_url = get_reservation_url(park_id) 
-        fulfillmentText = "Ok, here's the link: \n" + res_url + ".\n By the way, let me know if you'd like to hear more information about the campsite, activities to do there, its natural features, or nearby attractions!"
+        fulfillmentText = "Ok, here's the link: \n" + res_url + ".\n By the way, let me know if you'd like to hear more information about the campground, activities to do there, its natural features, or nearby attractions!"
     
                       
         
