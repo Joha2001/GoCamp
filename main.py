@@ -300,7 +300,8 @@ def webhook():
          # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
         #shorten length to 3 sentences or less
-        overview = ".".join(overview.split(".", 3)[:3])
+        if overview.count('.') > 3:
+          overview = ".".join(overview.split(".", 3)[:3]) + "."
         fulfillmentText = overview.replace("<br/>", "")
 
     # get campground natural features       
@@ -316,7 +317,8 @@ def webhook():
         # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
         #shorten length to 3 sentences or less
-        natural_features = ".".join(natural_features.split(".", 3)[:3])
+        if natural_features.count('.') > 3:
+          natural_features = ".".join(natural_features.split(".", 3)[:3]) + "."
         fulfillmentText = natural_features.replace("<br/>", "")
 
     # get nearby attractions       
@@ -332,7 +334,8 @@ def webhook():
         # generate output
         facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
         #shorten length to 3 sentences or less`
-        nearby_attractions = ".".join(nearby_attractions.split(".", 3)[:3])
+        if nearby_attractions.count('.') > 3:
+          nearby_attractions = ".".join(nearby_attractions.split(".", 3)[:3]) + "."
         fulfillmentText = nearby_attractions.replace("<br/>", "")    
 
 
