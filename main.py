@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 from flask import Flask, request
+import pandas as pd
+import re
+import csv
+import numpy
 import json
 import logging
 from datetime import datetime, timedelta
@@ -263,6 +267,44 @@ def webhook():
          
         else:
           fulfillmentText = "There are no campsites available from {} to {}.".format(start_date,end_date) 
+
+    if query_result.get('action') == 'FAGivenPark':
+
+          input_rawA = pd.read_csv(r"RecAreas_API_v1.csv")
+          input_rawB = pd.read_csv(r"RecAreaFacilities_API_v1.csv")
+          input_rawC = pd.read_csv(r"Facilities_API_v1.csv")
+
+          user_national_park_input = int(query_result.get('parameters').get('park'))
+          RecAreaID = 0
+          FacilityID = list()
+          FacilityDictionary = dict()
+          found = False
+
+          for index, row in input_rawA.iterrows():
+              if user_national_park_input == int(row['RecAreaID']):
+                  RecAreaID = int(row['RecAreaID'])
+                  found = True
+                  break
+
+          if not found:
+              fulfillmentText = "Sorry, we couldn't find the place you specified"
+
+          for index, row in input_rawB.iterrows():
+              if RecAreaID == row['RecAreaID']:
+                  FacilityID.append(str(row['FacilityID']))
+
+          for index, row in input_rawC.iterrows():
+              for i in range(0, len(FacilityID)):
+                  if FacilityID[i] == row["FacilityID"] and ("campground" in row["FacilityName"].lower() or "group sites" in row["FacilityName"].lower() or "camp ground" in row["FacilityName"].lower()):
+                      temp_str = re.sub('<[^<]+?>', '', row['FacilityDescription'])
+                      temp_str = re.sub("Overview\n|\n", ' ', temp_str)
+                      FacilityDictionary[row['FacilityID']] = [row['FacilityName'], temp_str]
+          if len(FacilityDictionary) == 0:
+            fulfillmentText = "Sorry, we couldn't find any campgrounds at this park!"
+
+          fulfillmentText = "The list of campgrounds are: "
+          for key,value in FacilityDictionary.items():
+              fulfillmentText = fulfillmentText + value[0].lower().title() + ", "
 
     # get activities at campground        
     if query_result.get('action') == 'CampgroundActivities':
