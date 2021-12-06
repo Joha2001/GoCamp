@@ -302,9 +302,10 @@ def webhook():
           if len(FacilityDictionary) == 0:
             fulfillmentText = "Sorry, we couldn't find any campgrounds at this park!"
 
-          fulfillmentText = "The list of campgrounds are: "
+          fulfillmentText = "The campgrounds at that park are: "
           for key,value in FacilityDictionary.items():
               fulfillmentText = fulfillmentText + value[0].lower().title() + ", "
+          fulfillmentText = fulfillmentText + "which one would you like to go to? Let me know if you want more information about any of them!"
 
     # get activities at campground        
     if query_result.get('action') == 'CampgroundActivities':
@@ -345,6 +346,25 @@ def webhook():
         if overview.count('.') > 3:
           overview = ".".join(overview.split(".", 3)[:3]) + "."
         fulfillmentText = overview.replace("<br/>", "")
+        fulfillmentText = fulfillmentText.replace("<p>", "")
+        fulfillmentText = fulfillmentText.replace("<br>", "")
+
+    if query_result.get('action') == 'CampInfoPark':
+
+         # get park ID
+        park_id = int(query_result.get('parameters').get('Campground')[0])
+        if park_id <= 999999:
+          # generate output
+          facilities, natural_features, nearby_attractions, overview, recreation = get_facility_description(park_id)
+          #shorten length to 3 sentences or less
+          if overview.count('.') > 3:
+            overview = ".".join(overview.split(".", 3)[:3]) + "."
+          fulfillmentText = overview.replace("<p>", "")
+          fulfillmentText = fulfillmentText.replace("<br/>", "")
+          fulfillmentText = fulfillmentText.replace("<br>", "")
+          ## fulfillmentText = re.sub("<p>|<br/>", "", fulfillmentText)
+        else:
+          fulfillmentText = "Actually, we don't have data on that campground! Hopefully, I can tell you about a different one!"
 
     # get campground natural features       
     if query_result.get('action') == 'NaturalFeatures':
@@ -362,6 +382,8 @@ def webhook():
         if natural_features.count('.') > 3:
           natural_features = ".".join(natural_features.split(".", 3)[:3]) + "."
         fulfillmentText = natural_features.replace("<br/>", "")
+        fulfillmentText = fulfillmentText.replace("<br>", "")
+        fulfillmentText = fulfillmentText.replace("<p>", "")
 
     # get nearby attractions       
     if query_result.get('action') == 'NearbyAttractions':
@@ -378,7 +400,9 @@ def webhook():
         #shorten length to 3 sentences or less`
         if nearby_attractions.count('.') > 3:
           nearby_attractions = ".".join(nearby_attractions.split(".", 3)[:3]) + "."
-        fulfillmentText = nearby_attractions.replace("<br/>", "")    
+        fulfillmentText = nearby_attractions.replace("<br/>", "")
+        fulfillmentText = fulfillmentText.replace("<p>", "")
+        fulfillmentText = fulfillmentText.replace("<br>", "")    
 
 
     # get campground reservation link
@@ -393,7 +417,6 @@ def webhook():
 
         res_url = get_reservation_url(park_id) 
         fulfillmentText = "Ok, here's the link: \n" + res_url + ".\n By the way, let me know if you'd like to hear more information about the campground, activities to do there, its natural features, or nearby attractions!"
-    
                       
         
     return {
